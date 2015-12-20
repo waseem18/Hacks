@@ -17,7 +17,7 @@ day = datetime.datetime.now().day
 hacks_result = []
 
 
-#iscmd : Is current month december?
+#iscmd : Is current month December?
 iscmd = False
 if month == 12:
    iscmd = True
