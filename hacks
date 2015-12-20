@@ -56,16 +56,16 @@ def HackathonsList1(city):
              hack['Travel'] = "Reimbursment provided!"
          elif i['travel'] == "no":
              hack['Travel'] = "No reimbursment!"
-       
+
          if i['facebookURL'] != "":
             hack['Contact'] = "i['facebookURL']"
          elif i['twitterURL']!="":
             hack['Contact'] = i['twitterURL']
          hacks_result.append(hack)
-       
-          
 
-   
+
+
+
    for i in data2[str(calendar.month_name[1])]:
        if city.lower() in (i['host']+" "+i['city']).lower():
          hack = {}
@@ -84,7 +84,7 @@ def HackathonsList1(city):
              hack['travel'] = "Reimbursement provided!"
          elif i['travel'] == "no":
              hack['travel'] = "No reimbursment"
-       
+
          if i['facebookURL'] != "":
             hack['Contact'] = i['facebookURL']
          elif i['twitterURL']!="":
@@ -98,7 +98,7 @@ def HackathonsList2(city):
    r = requests.get(url)
    if r.status_code !=200:
      return
-       
+
    data = json.loads(r.content)
    encoded_content = data['content']
    decoded_content = base64.b64decode(encoded_content)
@@ -129,7 +129,7 @@ def HackathonsList2(city):
         while str(i[j])!= "|":
             duration += i[j]
             j+=1
-        
+
         duration = duration.split('-')
         if len(duration)==1:
           start = duration[0].split('.')
@@ -141,10 +141,10 @@ def HackathonsList2(city):
           hack['Ends on'] = str(calendar.month_name[int(end[0])])+" "+str(end[1])
         if city.lower() in hack['location'].lower():
           hacks_result.append(hack)
-        
-        
-        
-        
+
+
+
+
 def HackathonsList3(city):
    url = "http://hackathonwatch.com:80/api//hackathons/coming.json?page=1"
    r = requests.get(url)
@@ -163,8 +163,8 @@ def HackathonsList3(city):
         hack['Ends on'] = datetime.datetime.fromtimestamp(i['finish_timestamp']).strftime('%Y-%m-%d %H:%M:%S')
         hack['location'] = i['full_address']
         hacks_result.append(hack)
-      
-      
+
+
 def HackathonsList4(city):
    url = "https://api.github.com/repos/waseem18/Hackathons-In-India/contents/README.md"
    r = requests.get(url)
@@ -209,20 +209,20 @@ def HackathonsList4(city):
           hack['Ends on'] = end
           if city.lower() in hack['location'].lower():
             hacks_result.append(hack)
-          
 
 
 
-          
+
+
 def print_help():
    print "Usage:"
    print "     1. Just typing 'hacks' outputs the list of Hackathons in or near your location!\n"
    print "     2. Command 'hacks California' gives the list of Hackathons in California.\n"
    print "     3. We consider all arguments after first arguments as a single argument(city name)).\n"
    print "     4. So command 'hacks New York' too gives the list of Hackathons in New York.\n"
-               
 
-      
+
+
 
 if no_of_arguments == 1:
    #Outputs details of upcoming hackathons in the location of the user.
@@ -252,7 +252,7 @@ if no_of_arguments == 1:
         print "Location  : "+i['location']
         print "-----------------------------------------------------------------"
    if len(hacks_result)==0:
-     print "Looking for Hackathons in "+regionName+","+country+"..."
+     print "Looking for Hackathons in "+region+","+country+"..."
      HackathonsList1(region)
      HackathonsList2(region)
      HackathonsList3(region)
@@ -269,8 +269,8 @@ if no_of_arguments == 1:
      HackathonsList4(country)
    if len(hacks_result)==0:
      print "We couldn't find hackathons in "+city+","+country+". Try refining the search location Or try the command, 'hacks locationName'. Eg: hacks California"
-   
-   
+
+
 elif no_of_arguments == 2:
    city = str(sys.argv[1])
    if city=="-h" or city =="--help":
@@ -297,9 +297,9 @@ elif no_of_arguments == 2:
         print "-----------------------------------------------------------------"
    else:
      print "We couldn't find hackathons in "+city+". Try refining the search location or find more hackathons at https://github.com/japacible/Hackathon-Calendar"
-   
-   
-   
+
+
+
 elif no_of_arguments > 2:
    c = ""
    j=1
@@ -308,7 +308,7 @@ elif no_of_arguments > 2:
         c+=" "
         j+=1
    city = str(c[0:len(c)-1])
-   
+
    print "Please wait a few seconds while we fetch the details for you..."
    HackathonsList1(city)
    HackathonsList2(city)
@@ -326,4 +326,3 @@ elif no_of_arguments > 2:
         print "-----------------------------------------------------------------"
    else:
      print "We couldn't find hackathons in "+city+". Try refining the search location or find more hackathons at https://github.com/japacible/Hackathon-Calendar"
-          
