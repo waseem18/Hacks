@@ -1,6 +1,6 @@
 Hacks
 ============
-A Linux terminal client to find upcoming Hackathons nearby or at a particulat location.
+A Linux terminal client to find upcoming Hackathons near you or at a particular location.
 
 Installation
 --------------
