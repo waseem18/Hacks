@@ -285,7 +285,7 @@ elif no_of_arguments == 2:
         print "Title     : "+i['Title']
         print "URL       : "+i['URL']
         print "Starts on : "+i['Starts on']
-        if i['Ends on']:
+        if 'Ends on' in i:
            print "Ends on   : "+i['Ends on']
         print "Location  : "+i['location']
         print "-----------------------------------------------------------------"
