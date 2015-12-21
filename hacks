@@ -13,31 +13,66 @@ year = datetime.datetime.now().year
 month = datetime.datetime.now().month
 day = datetime.datetime.now().day
 
+class Hackanswers:
+    def fetch(self):
+        print "Please wait a few seconds while we fetch the details for you..."
+        self.list1 = []
+        self.list2 = []
+        self.list3 = []
+        self.list4 = []
+
+        def splitcontent(url):
+            r = requests.get(url)
+            if r.status_code != 200:
+                raise RuntimeError
+            decoded_content = base64.b64decode(json.loads(r.content)['content'])
+            return decoded_content.split('\n')
+
+        # list1[r1,r2]
+        url_1_1 = "http://www.hackalist.org/api/1.0/"+str(year)+"/"+str(month)+".json"
+        url_1_2 = "http://www.hackalist.org/api/1.0/"+str(year)+"/"+str(month+1)+".json"
+        if month == 12:
+            url_1_2 = "http://www.hackalist.org/api/1.0/"+str(year+1)+"/"+"01"+".json"
+        r1 = requests.get(url_1_1)
+        if r1.status_code != 200:
+            print "Couldn't fetch hackalist.org [1]"
+        else:
+            self.list1.append(json.loads(r1.content))
+        r2 = requests.get(url_1_2)
+        if r2.status_code != 200:
+            print "Couldn't fetch hackalist.org [2]"
+        else:
+            self.list1.append(json.loads(r2.content))
+
+        # list2[r]
+        url_2 = "https://api.github.com/repos/japacible/Hackathon-Calendar/contents/README.md?ref=master"
+        try:
+            self.list2.append(splitcontent(url_2))
+        except RuntimeError as e:
+            print "Couldn't fetch Hackathon-Calendar"
+
+        # list3[r]
+        url_3 = "http://hackathonwatch.com:80/api//hackathons/coming.json?page=1"
+        r = requests.get(url_3)
+        if r.status_code!=200:
+            print "Couldn't fetch hackathonwatch.com"
+        else:
+            self.list3.append(json.loads(r.content))
+
+        # list4[r]
+        url_4 = "https://api.github.com/repos/waseem18/Hackathons-In-India/contents/README.md"
+        try:
+            self.list4.append(splitcontent(url_4))
+        except RuntimeError as e:
+            print "Couldn't fetch Hackathons-In-India"
 
 hacks_result = []
-
-
-#iscmd : Is current month December?
-iscmd = False
-if month == 12:
-   iscmd = True
-
-
+hacks_answer = Hackanswers()
 
 
 def HackathonsList1(city):
-   url1 = "http://www.hackalist.org/api/1.0/"+str(year)+"/"+str(month)+".json"
-   url2 = "http://www.hackalist.org/api/1.0/"+str(year)+"/"+str(month+1)+".json"
-   if iscmd:
-      url2 = "http://www.hackalist.org/api/1.0/"+str(year+1)+"/"+"01"+".json"
-   r1 = requests.get(url1)
-   if r1.status_code != 200:
-     return
-   r2 = requests.get(url2)
-   if r2.status_code!=200:
-     return
-   data1 = json.loads(r1.content)
-   data2 = json.loads(r2.content)
+   data1 = hacks_answer.list1[0]
+   data2 = hacks_answer.list1[1]
    for i in data1[str(calendar.month_name[month])]:
        if city.lower() in (i['host']+" "+i['city']).lower():
          hack = {}
@@ -62,10 +97,6 @@ def HackathonsList1(city):
          elif i['twitterURL']!="":
             hack['Contact'] = i['twitterURL']
          hacks_result.append(hack)
-
-
-
-
    for i in data2[str(calendar.month_name[1])]:
        if city.lower() in (i['host']+" "+i['city']).lower():
          hack = {}
@@ -94,15 +125,7 @@ def HackathonsList1(city):
 
 
 def HackathonsList2(city):
-   url = "https://api.github.com/repos/japacible/Hackathon-Calendar/contents/README.md?ref=master"
-   r = requests.get(url)
-   if r.status_code !=200:
-     return
-
-   data = json.loads(r.content)
-   encoded_content = data['content']
-   decoded_content = base64.b64decode(encoded_content)
-   decoded_content = decoded_content.split('\n')
+   decoded_content = hacks_answer.list2[0]
    for i in decoded_content:
       hack = {}
       if i[0:3] == "| [":
@@ -146,11 +169,7 @@ def HackathonsList2(city):
 
 
 def HackathonsList3(city):
-   url = "http://hackathonwatch.com:80/api//hackathons/coming.json?page=1"
-   r = requests.get(url)
-   if r.status_code!=200:
-     return
-   data = json.loads(r.content)
+   data = hacks_answer.list3[0]
    for i in data:
       if city.lower() in i['full_address'].lower():
         hack = {}
@@ -166,14 +185,7 @@ def HackathonsList3(city):
 
 
 def HackathonsList4(city):
-   url = "https://api.github.com/repos/waseem18/Hackathons-In-India/contents/README.md"
-   r = requests.get(url)
-   if r.status_code!=200:
-     return
-   data = json.loads(r.content)
-   encoded_content = data['content']
-   decoded_content = base64.b64decode(encoded_content)
-   decoded_content = decoded_content.split('\n')
+   decoded_content = hacks_answer.list4[0]
    for i in decoded_content:
        hack = {}
        if str(i[0:2]) == "|[":
@@ -210,10 +222,6 @@ def HackathonsList4(city):
           if city.lower() in hack['location'].lower():
             hacks_result.append(hack)
 
-
-
-
-
 def print_help():
    print "Usage:"
    print "     1. Just typing 'hacks' outputs the list of Hackathons in or near your location!\n"
@@ -221,7 +229,11 @@ def print_help():
    print "     3. We consider all arguments after first arguments as a single argument(city name)).\n"
    print "     4. So command 'hacks New York' too gives the list of Hackathons in New York.\n"
 
-
+def runLists(data):
+    HackathonsList1(data)
+    HackathonsList2(data)
+    HackathonsList3(data)
+    HackathonsList4(data)
 
 
 if no_of_arguments == 1:
@@ -232,15 +244,9 @@ if no_of_arguments == 1:
    city = str(data['city'])
    region = data['regionName']
    country = data['country']
-   print "Please wait a few seconds while we fetch the details for you..."
-   HackathonsList1(city)
-   HackathonsList2(city)
-   HackathonsList3(city)
-   HackathonsList4(city)
-   HackathonsList1(region)
-   HackathonsList2(region)
-   HackathonsList3(region)
-   HackathonsList4(region)
+   hacks_answer.fetch()
+   runLists(city)
+   runLists(region)
    if len(hacks_result):
      print "\n"
      for i in hacks_result:
@@ -252,23 +258,14 @@ if no_of_arguments == 1:
         print "Location  : "+i['location']
         print "-----------------------------------------------------------------"
    if len(hacks_result)==0:
-     print "Looking for Hackathons in "+region+","+country+"..."
-     HackathonsList1(region)
-     HackathonsList2(region)
-     HackathonsList3(region)
-     HackathonsList4(region)
-     HackathonsList1(country)
-     HackathonsList2(country)
-     HackathonsList3(country)
-     HackathonsList4(country)
+     print "Looking for Hackathons in %s, %s..." % (region, country)
+     runLists(region)
+     runLists(country)
    if len(hacks_result)==0:
-     print "Looking for Hackathons in "+country+"..."
-     HackathonsList1(country)
-     HackathonsList2(country)
-     HackathonsList3(country)
-     HackathonsList4(country)
+     print "Looking for Hackathons in %s..." % (country)
+     runLists(country)
    if len(hacks_result)==0:
-     print "We couldn't find hackathons in "+city+","+country+". Try refining the search location Or try the command, 'hacks locationName'. Eg: hacks California"
+     print "We couldn't find hackathons in %s, %s.\nTry refining the search location Or try the command, 'hacks locationName'.\nEg: hacks California" % (city, country)
 
 
 elif no_of_arguments == 2:
@@ -280,13 +277,10 @@ elif no_of_arguments == 2:
        print "Hacks  - 0.1.0\n"
        print "https://github.com/waseem18/hacks\n"
        exit(0)
-   print "Please wait a few seconds while we fetch the details for you..."
-   HackathonsList1(city)
-   HackathonsList2(city)
-   HackathonsList3(city)
-   HackathonsList4(city)
+   hacks_answer.fetch()
+   runLists(city)
    if len(hacks_result):
-     print "\n"
+     print "\n-----------------------------------------------------------------"
      for i in hacks_result:
         print "Title     : "+i['Title']
         print "URL       : "+i['URL']
@@ -295,8 +289,9 @@ elif no_of_arguments == 2:
            print "Ends on   : "+i['Ends on']
         print "Location  : "+i['location']
         print "-----------------------------------------------------------------"
+     print ""
    else:
-     print "We couldn't find hackathons in "+city+". Try refining the search location or find more hackathons at https://github.com/japacible/Hackathon-Calendar"
+     print "We couldn't find hackathons in %s.\nTry refining the search location or find more hackathons at https://github.com/japacible/Hackathon-Calendar" % (city)
 
 
 
@@ -308,12 +303,8 @@ elif no_of_arguments > 2:
         c+=" "
         j+=1
    city = str(c[0:len(c)-1])
-
-   print "Please wait a few seconds while we fetch the details for you..."
-   HackathonsList1(city)
-   HackathonsList2(city)
-   HackathonsList3(city)
-   HackathonsList4(city)
+   hacks_answer.fetch()
+   runLists(city)
    if len(hacks_result):
      print "\n"
      for i in hacks_result:
@@ -325,4 +316,4 @@ elif no_of_arguments > 2:
         print "Location  : "+i['location']
         print "-----------------------------------------------------------------"
    else:
-     print "We couldn't find hackathons in "+city+". Try refining the search location or find more hackathons at https://github.com/japacible/Hackathon-Calendar"
+     print "We couldn't find hackathons in %s.\nTry refining the search location or find more hackathons at https://github.com/japacible/Hackathon-Calendar" % (city)
