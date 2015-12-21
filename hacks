@@ -286,7 +286,7 @@ elif no_of_arguments == 2:
       print_help()
       sys.exit(0)
    elif city=="--version":
-       print "Hacks  - 0.1.0\n"
+       print "Hacks  - 0.1.1\n"
        print "https://github.com/waseem18/hacks\n"
        exit(0)
    hacks_answer.fetch()
