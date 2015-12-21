@@ -17,7 +17,7 @@ Installation
 Commands
 --------
 ```
-hacks                                 Output details of Hackathons in or near your current location.
+hacks                                 Outputs details of Hackathons in or near your current location.
 hacks [location]                      Outputs details of Hackathons in or near [location]
 ```
 Examples
