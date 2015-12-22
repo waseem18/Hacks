@@ -230,22 +230,11 @@ def print_help():
    print "     4. So command 'hacks New York' too gives the list of Hackathons in New York.\n"
 
 def runLists(data):
-    try:
-        HackathonsList1(data)
-    except:
-        pass
-    try:
-        HackathonsList2(data)
-    except:
-        pass
-    try:
-        HackathonsList3(data)
-    except:
-        pass
-    try:
-        HackathonsList4(data)
-    except:
-        pass
+    for f in [HackathonsList1, HackathonsList2, HackathonsList3, HackathonsList4]:
+        try:
+            f(data)
+        except:
+            pass
 
 
 if no_of_arguments == 1:
