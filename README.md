@@ -28,6 +28,9 @@ hacks California
 hacks New York
 hacks Canada
 hacks Hyderabad
+hacks --version
+hacks --help
+hacks --all
 ```
 
 Note
@@ -48,4 +51,3 @@ Contributions
 
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/waseem18/hacks/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
-
