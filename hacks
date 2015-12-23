@@ -1,11 +1,9 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 import sys
-import json
 import requests
 import datetime
 import calendar
 import base64
-from ctypes import c_longlong as ll
 
 no_of_arguments = len(sys.argv)
 
@@ -13,319 +11,313 @@ year = datetime.datetime.now().year
 month = datetime.datetime.now().month
 day = datetime.datetime.now().day
 
+
 class Hackanswers:
+    """object to hold information from our sources, to be dissected later."""
+
     def fetch(self):
-        print "Please wait a few seconds while we fetch the details for you..."
+        """prepares the object to be queried for results by HackathonsList?(data),
+where <data> is the city or location"""
+        print("Please wait a few seconds while we fetch the details for you...")
         self.list1 = []
         self.list2 = []
         self.list3 = []
         self.list4 = []
 
         def splitcontent(url):
+            """possible abstraction for splitting request answeres"""
             r = requests.get(url)
             if r.status_code != 200:
                 raise RuntimeError
-            decoded_content = base64.b64decode(json.loads(r.content)['content'])
+            decoded_content = base64.b64decode(r.json()['content']).decode()
             return decoded_content.split('\n')
 
         # list1[r1,r2]
-        url_1_1 = "http://www.hackalist.org/api/1.0/"+str(year)+"/"+str(month)+".json"
-        url_1_2 = "http://www.hackalist.org/api/1.0/"+str(year)+"/"+str(month+1)+".json"
+        url_1_1 = "http://www.hackalist.org/api/1.0/" + str(year) + "/" + str(month) + ".json"
+        url_1_2 = "http://www.hackalist.org/api/1.0/" + str(year) + "/" + str(month + 1) + ".json"
         if month == 12:
-            url_1_2 = "http://www.hackalist.org/api/1.0/"+str(year+1)+"/"+"01"+".json"
+            url_1_2 = "http://www.hackalist.org/api/1.0/" + str(year + 1) + "/" + "01" + ".json"
         r1 = requests.get(url_1_1)
         if r1.status_code != 200:
-            print "Couldn't fetch hackalist.org [1]"
+            print("Couldn't fetch hackalist.org [1]")
         else:
-            self.list1.append(json.loads(r1.content))
+            self.list1.append(r1.json())
         r2 = requests.get(url_1_2)
         if r2.status_code != 200:
-            print "Couldn't fetch hackalist.org [2]"
+            print("Couldn't fetch hackalist.org [2]")
         else:
-            self.list1.append(json.loads(r2.content))
+            self.list1.append(r2.json())
 
         # list2[r]
         url_2 = "https://api.github.com/repos/japacible/Hackathon-Calendar/contents/README.md?ref=master"
         try:
             self.list2.append(splitcontent(url_2))
-        except RuntimeError as e:
-            print "Couldn't fetch Hackathon-Calendar"
+        except RuntimeError:
+            print("Couldn't fetch Hackathon-Calendar")
 
         # list3[r]
         url_3 = "http://hackathonwatch.com:80/api//hackathons/coming.json?page=1"
         r = requests.get(url_3)
-        if r.status_code!=200:
-            print "Couldn't fetch hackathonwatch.com"
+        if r.status_code != 200:
+            print("Couldn't fetch hackathonwatch.com")
         else:
-            self.list3.append(json.loads(r.content))
+            self.list3.append(r.json())
 
         # list4[r]
         url_4 = "https://api.github.com/repos/waseem18/Hackathons-In-India/contents/README.md"
         try:
             self.list4.append(splitcontent(url_4))
-        except RuntimeError as e:
-            print "Couldn't fetch Hackathons-In-India"
+        except RuntimeError:
+            print("Couldn't fetch Hackathons-In-India")
 
+# initialization
 hacks_result = []
 hacks_answer = Hackanswers()
 
-
 def HackathonsList1(city):
-   data1 = hacks_answer.list1[0]
-   data2 = hacks_answer.list1[1]
-   for i in data1[str(calendar.month_name[month])]:
-       if city.lower() in (i['host']+" "+i['city']).lower():
-         hack = {}
-         hack['Title'] = i['title']
-         hack['URL'] = i['url']
-         if i['highSchoolers']=="yes":
-            hack['HighSchoolers'] = "Yes"
-         else:
-            hack['HighSchoolers'] = "No"
-         hack['Starts on']=i['startDate']+" "+i['year']
-         hack['Ends on'] = i['endDate']+" "+i['year']
-         hack['location'] = i['host']+" "+i['city']
-         if i['travel'] == "" or i['travel']=="unknown":
-             hack['Travel'] = "Not mentioned"
-         elif i['travel'] == "yes":
-             hack['Travel'] = "Reimbursment provided!"
-         elif i['travel'] == "no":
-             hack['Travel'] = "No reimbursment!"
-
-         if i['facebookURL'] != "":
-            hack['Contact'] = "i['facebookURL']"
-         elif i['twitterURL']!="":
-            hack['Contact'] = i['twitterURL']
-         hacks_result.append(hack)
-   for i in data2[str(calendar.month_name[1])]:
-       if city.lower() in (i['host']+" "+i['city']).lower():
-         hack = {}
-         hack['Title'] = i['title']
-         hack['URL'] = i['url']
-         if i['highSchoolers']=="yes":
-            hack['HighSchoolers'] = "Yes"
-         else:
-            hack['HighSchoolers'] = "No"
-         hack['Starts on']=i['startDate']+" "+i['year']
-         hack['Ends on'] = i['endDate']+" "+i['year']
-         hack['location'] = i['host']+" "+i['city']
-         if i['travel'] == "" or i['travel'] == "unknown":
-             hack['travel'] = "Not mentioned!"
-         elif i['travel'] == "yes":
-             hack['travel'] = "Reimbursement provided!"
-         elif i['travel'] == "no":
-             hack['travel'] = "No reimbursment"
-
-         if i['facebookURL'] != "":
-            hack['Contact'] = i['facebookURL']
-         elif i['twitterURL']!="":
-            hack['Contact'] = i['twitterURL']
-         hacks_result.append(hack)
-
+    data1 = hacks_answer.list1[0]
+    data2 = hacks_answer.list1[1]
+    for i in data1[str(calendar.month_name[month])]:
+        if city.lower() in (i['host'] + " " + i['city']).lower():
+            hack = {}
+            hack['Title'] = i['title']
+            hack['URL'] = i['url']
+            if i['highSchoolers'] == "yes":
+                hack['HighSchoolers'] = "Yes"
+            else:
+                hack['HighSchoolers'] = "No"
+            hack['Starts on'] = i['startDate'] + " " + i['year']
+            hack['Ends on'] = i['endDate'] + " " + i['year']
+            hack['location'] = i['host'] + " " + i['city']
+            if i['travel'] == "" or i['travel'] == "unknown":
+                hack['Travel'] = "Not mentioned"
+            elif i['travel'] == "yes":
+                hack['Travel'] = "Reimbursment provided!"
+            elif i['travel'] == "no":
+                hack['Travel'] = "No reimbursment!"
+            if i['facebookURL'] != "":
+                hack['Contact'] = "i['facebookURL']"
+            elif i['twitterURL'] != "":
+                hack['Contact'] = i['twitterURL']
+            hacks_result.append(hack)
+    for i in data2[str(calendar.month_name[1])]:
+        if city.lower() in (i['host'] + " " + i['city']).lower():
+            hack = {}
+            hack['Title'] = i['title']
+            hack['URL'] = i['url']
+            if i['highSchoolers'] == "yes":
+                hack['HighSchoolers'] = "Yes"
+            else:
+                hack['HighSchoolers'] = "No"
+            hack['Starts on'] = i['startDate'] + " " + i['year']
+            hack['Ends on'] = i['endDate'] + " " + i['year']
+            hack['location'] = i['host'] + " " + i['city']
+            if i['travel'] == "" or i['travel'] == "unknown":
+                hack['travel'] = "Not mentioned!"
+            elif i['travel'] == "yes":
+                hack['travel'] = "Reimbursement provided!"
+            elif i['travel'] == "no":
+                hack['travel'] = "No reimbursment"
+            if i['facebookURL'] != "":
+                hack['Contact'] = i['facebookURL']
+            elif i['twitterURL'] != "":
+                hack['Contact'] = i['twitterURL']
+            hacks_result.append(hack)
 
 
 def HackathonsList2(city):
-   decoded_content = hacks_answer.list2[0]
-   for i in decoded_content:
-      hack = {}
-      if i[0:3] == "| [":
-        j = 3
-        title = ""
-        link = ""
-        place = ""
-        duration = ""
-        while str(i[j])!="]":
-             title += i[j]
-             j+=1
-        hack['Title'] = title
-        j+=2
-        while str(i[j])!= ")":
-             link += i[j]
-             j+=1
-        hack['URL']=link
-        j+=4
-        while str(i[j])!= "|":
-             place += i[j]
-             j+=1
-        hack['location'] = place
-        j+=2
-        while str(i[j])!= "|":
-            duration += i[j]
-            j+=1
+    decoded_content = hacks_answer.list2[0]
+    for i in decoded_content:
+        hack = {}
+        if i[0:3] == "| [":
+            j = 3
+            title = ""
+            link = ""
+            place = ""
+            duration = ""
+            while str(i[j]) != "]":
+                title += i[j]
+                j += 1
+            hack['Title'] = title
+            j += 2
+            while str(i[j]) != ")":
+                link += i[j]
+                j += 1
+            hack['URL'] = link
+            j += 4
+            while str(i[j]) != "|":
+                place += i[j]
+                j += 1
+            hack['location'] = place
+            j += 2
+            while str(i[j]) != "|":
+                duration += i[j]
+                j += 1
 
-        duration = duration.split('-')
-        if len(duration)==1:
-          start = duration[0].split('.')
-          hack['Starts on'] = str(calendar.month_name[int(start[0])])+" "+str(start[1])
-        elif len(duration)==2:
-          start = duration[0].split('.')
-          end = duration[1].split('.')
-          hack['Starts on'] = str(calendar.month_name[int(start[0])])+" "+str(start[1])
-          hack['Ends on'] = str(calendar.month_name[int(end[0])])+" "+str(end[1])
-        if city.lower() in hack['location'].lower():
-          hacks_result.append(hack)
-
-
+            duration = duration.split('-')
+            if len(duration) == 1:
+                start = duration[0].split('.')
+                hack['Starts on'] = str(calendar.month_name[int(start[0])]) + " " + str(start[1])
+            elif len(duration) == 2:
+                start = duration[0].split('.')
+                end = duration[1].split('.')
+                hack['Starts on'] = str(calendar.month_name[int(start[0])]) + " " + str(start[1])
+                hack['Ends on'] = str(calendar.month_name[int(end[0])]) + " " + str(end[1])
+            if city.lower() in hack['location'].lower():
+                hacks_result.append(hack)
 
 
 def HackathonsList3(city):
-   data = hacks_answer.list3[0]
-   for i in data:
-      if city.lower() in i['full_address'].lower():
-        hack = {}
-        hack['Title'] = i['name']
-        hack['URL'] = i['public_url']
-        duration = long(i['finish_timestamp'])-long(i['start_timestamp'])
-        hack['Duration'] = str(duration)
-        no_of_hours = duration/3600
-        hack['Starts on'] = datetime.datetime.fromtimestamp(i['start_timestamp']).strftime('%Y-%m-%d %H:%M:%S')
-        hack['Ends on'] = datetime.datetime.fromtimestamp(i['finish_timestamp']).strftime('%Y-%m-%d %H:%M:%S')
-        hack['location'] = i['full_address']
-        hacks_result.append(hack)
+    data = hacks_answer.list3[0]
+    for i in data:
+        if city.lower() in i['full_address'].lower():
+            hack = {}
+            hack['Title'] = i['name']
+            hack['URL'] = i['public_url']
+            duration = int(i['finish_timestamp']) - int(i['start_timestamp'])
+            hack['Duration'] = str(duration)
+            # no_of_hours = duration / 3600
+            hack['Starts on'] = datetime.datetime.fromtimestamp(i['start_timestamp']).strftime(
+                '%Y-%m-%d %H:%M:%S')
+            hack['Ends on'] = datetime.datetime.fromtimestamp(i['finish_timestamp']).strftime(
+                '%Y-%m-%d %H:%M:%S')
+            hack['location'] = i['full_address']
+            hacks_result.append(hack)
 
 
 def HackathonsList4(city):
-   decoded_content = hacks_answer.list4[0]
-   for i in decoded_content:
-       hack = {}
-       if str(i[0:2]) == "|[":
-          title = ""
-          link = ""
-          location =""
-          start = ""
-          end = ""
-          j=2
-          while i[j]!=']':
-               title += i[j]
-               j+=1
-          hack['Title'] = title
-          j+=2
-          while i[j]!=')':
-               link += i[j]
-               j+=1
-          hack['URL'] = link
-          j+=2
-          while i[j]!='|':
-               location += i[j]
-               j +=1
-          hack['location'] = location
-          j+=1
-          while i[j]!='|':
-               start += i[j]
-               j+=1
-          hack['Starts on'] = start
-          j+=1
-          while i[j]!='|':
-               end += i[j]
-               j+=1
-          hack['Ends on'] = end
-          if city.lower() in hack['location'].lower():
-            hacks_result.append(hack)
+    decoded_content = hacks_answer.list4[0]
+    for i in decoded_content:
+        hack = {}
+        if str(i[0:2]) == "|[":
+            title = ""
+            link = ""
+            location = ""
+            start = ""
+            end = ""
+            j = 2
+            while i[j] != ']':
+                title += i[j]
+                j += 1
+            hack['Title'] = title
+            j += 2
+            while i[j] != ')':
+                link += i[j]
+                j += 1
+            hack['URL'] = link
+            j += 2
+            while i[j] != '|':
+                location += i[j]
+                j += 1
+            hack['location'] = location
+            j += 1
+            while i[j] != '|':
+                start += i[j]
+                j += 1
+            hack['Starts on'] = start
+            j += 1
+            while i[j] != '|':
+                end += i[j]
+                j += 1
+            hack['Ends on'] = end
+            if city.lower() in hack['location'].lower():
+                hacks_result.append(hack)
+
 
 def print_help():
-   print "Usage:"
-   print "     1. Just typing 'hacks' outputs the list of Hackathons in or near your location!\n"
-   print "     2. Command 'hacks California' gives the list of Hackathons in California.\n"
-   print "     3. We consider all arguments after first arguments as a single argument(city name)).\n"
-   print "     4. So command 'hacks New York' too gives the list of Hackathons in New York.\n"
+    """prints the help string"""
+    print("Usage:")
+    print("     1. Just typing 'hacks' outputs the list of Hackathons in or near your location!\n")
+    print("     2. Command 'hacks California' gives the list of Hackathons in California.\n")
+    print("     3. We consider all arguments after first arguments as a single argument(city name)).\n")
+    print("     4. So command 'hacks New York' too gives the list of Hackathons in New York.\n")
+
 
 def runLists(data):
-    try:
-        HackathonsList1(data)
-    except:
-        pass
-    try:
-        HackathonsList2(data)
-    except:
-        pass
-    try:
-        HackathonsList3(data)
-    except:
-        pass
-    try:
-        HackathonsList4(data)
-    except:
-        pass
+    """call this function with your location as <data>
+it will append every valid Hackathon to hacks_result"""
+    for f in [HackathonsList1, HackathonsList2, HackathonsList3, HackathonsList4]:
+        try:
+            f(data)
+        except:
+            pass
+
+def printResults():
+    """This print all entries in hacks_result.
+Consider running hacks_answer.fetch() beforehand.
+    """
+    print("\n-----------------------------------------------------------------")
+    for i in hacks_result:
+        print("Title     : " + i['Title'])
+        print("URL       : " + i['URL'])
+        print("Starts on : " + i['Starts on'])
+        if 'Ends on' in i:
+            print("Ends on   : " + i['Ends on'])
+        print("Location  : " + i['location'])
+        print("-----------------------------------------------------------------")
+    print("")
 
 
 if no_of_arguments == 1:
-   #Outputs details of upcoming hackathons in the location of the user.
-   url = "http://ip-api.com/json"
-   r = requests.get(url)
-   data = json.loads(r.content)
-   city = str(data['city'])
-   region = data['regionName']
-   country = data['country']
-   hacks_answer.fetch()
-   runLists(city)
-   runLists(region)
-   if len(hacks_result):
-     print "\n"
-     for i in hacks_result:
-        print "Title     : "+i['Title']
-        print "URL       : "+i['URL']
-        print "Starts on : "+i['Starts on']
-        if i['Ends on']:
-           print "Ends on   : "+i['Ends on']
-        print "Location  : "+i['location']
-        print "-----------------------------------------------------------------"
-   if len(hacks_result)==0:
-     print "Looking for Hackathons in %s, %s..." % (region, country)
-     runLists(region)
-     runLists(country)
-   if len(hacks_result)==0:
-     print "Looking for Hackathons in %s..." % (country)
-     runLists(country)
-   if len(hacks_result)==0:
-     print "We couldn't find hackathons in %s, %s.\nTry refining the search location Or try the command, 'hacks locationName'.\nEg: hacks California" % (city, country)
+    # Outputs details of upcoming hackathons in the location of the user.
+    url = "http://ip-api.com/json"
+    r = requests.get(url)
+    data = r.json()
+    city = str(data['city'])
+    region = data['regionName']
+    country = data['country']
+    hacks_answer.fetch()
+    runLists(city)
+    runLists(region)
+    if len(hacks_result) == 0:
+        print("Looking for Hackathons in %s, %s..." % (region, country))
+        runLists(region) # is this line necessary?
+        runLists(country) # does this make L266-268 redundant?
+    if len(hacks_result) == 0:
+        print("Looking for Hackathons in %s..." % (country))
+        runLists(country) # can this possibly append something?
+    if len(hacks_result):
+        printResults()
+    else:
+        print(
+            "We couldn't find hackathons in %s, %s.\n"
+            "Try refining the search location Or try the command, 'hacks locationName'.\n"
+            "Eg: hacks California" % (city, country))
 
 
 elif no_of_arguments == 2:
-   city = str(sys.argv[1])
-   if city=="-h" or city =="--help":
-      print_help()
-      sys.exit(0)
-   elif city=="--version":
-       print "Hacks  - 0.1.0\n"
-       print "https://github.com/waseem18/hacks\n"
-       exit(0)
-   hacks_answer.fetch()
-   runLists(city)
-   if len(hacks_result):
-     print "\n-----------------------------------------------------------------"
-     for i in hacks_result:
-        print "Title     : "+i['Title']
-        print "URL       : "+i['URL']
-        print "Starts on : "+i['Starts on']
-        if 'Ends on' in i:
-           print "Ends on   : "+i['Ends on']
-        print "Location  : "+i['location']
-        print "-----------------------------------------------------------------"
-     print ""
-   else:
-     print "We couldn't find hackathons in %s.\nTry refining the search location or find more hackathons at https://github.com/japacible/Hackathon-Calendar" % (city)
-
+    city = str(sys.argv[1])
+    if city == "-h" or city == "--help":
+        print_help()
+        sys.exit(0)
+    elif city == "--version":
+        print("Hacks  - 0.1.1\n")
+        print("https://github.com/waseem18/hacks\n")
+        sys.exit(0)
+    elif city in ["-a", "--all"]:
+        hacks_answer.fetch()
+        runLists("")
+        printResults()
+        sys.exit(0)
+    hacks_answer.fetch()
+    runLists(city)
+    if len(hacks_result):
+        printResults()
+    else:
+        print(
+            "We couldn't find hackathons in %s.\n"
+            "Try refining the search location or find more hackathons at "
+            "https://github.com/japacible/Hackathon-Calendar" % (city))
 
 
 elif no_of_arguments > 2:
-   c = ""
-   j=1
-   while j<len(sys.argv):
-        c += sys.argv[j]
-        c+=" "
-        j+=1
-   city = str(c[0:len(c)-1])
-   hacks_answer.fetch()
-   runLists(city)
-   if len(hacks_result):
-     print "\n"
-     for i in hacks_result:
-        print "Title     : "+i['Title']
-        print "URL       : "+i['URL']
-        print "Starts on : "+i['Starts on']
-        if 'Ends on' in i:
-           print "Ends on   : "+i['Ends on']
-        print "Location  : "+i['location']
-        print "-----------------------------------------------------------------"
-   else:
-     print "We couldn't find hackathons in %s.\nTry refining the search location or find more hackathons at https://github.com/japacible/Hackathon-Calendar" % (city)
+    city = " ".join(sys.argv[1:])
+    hacks_answer.fetch()
+    runLists(city)
+    if len(hacks_result):
+        printResults()
+    else:
+        print(
+            "We couldn't find hackathons in %s.\n"
+            "Try refining the search location or find more hackathons at "
+            "https://github.com/japacible/Hackathon-Calendar" % (city))
