@@ -23,16 +23,29 @@ where <data> is the city or location"""
         self.list2 = []
         self.list3 = []
         self.list4 = []
+        fetchalg = [self.fetchHackathonList,
+            self.fetchHackathonCal,
+            self.fetchHackathonWatch,
+            self.fetchHackathonIndia]
+        try:
+            import tqdm
+            fetchalg = tqdm.tqdm(fetchalg)
+        except:
+            pass
+        for alg in fetchalg:
+            alg()
 
-        def splitcontent(url):
-            """possible abstraction for splitting request answeres"""
-            r = requests.get(url)
-            if r.status_code != 200:
-                raise RuntimeError
-            decoded_content = base64.b64decode(r.json()['content']).decode()
-            return decoded_content.split('\n')
+    def splitcontent(self, url):
+        """possible abstraction for splitting request answeres"""
+        r = requests.get(url)
+        if r.status_code != 200:
+            raise RuntimeError
+        decoded_content = base64.b64decode(r.json()['content']).decode()
+        return decoded_content.split('\n')
+
 
         # list1[r1,r2]
+    def fetchHackathonList(self):
         url_1_1 = "http://www.hackalist.org/api/1.0/" + str(year) + "/" + str(month) + ".json"
         url_1_2 = "http://www.hackalist.org/api/1.0/" + str(year) + "/" + str(month + 1) + ".json"
         if month == 12:
@@ -48,14 +61,14 @@ where <data> is the city or location"""
         else:
             self.list1.append(r2.json())
 
-        # list2[r]
+    def fetchHackathonCal(self):
         url_2 = "https://api.github.com/repos/japacible/Hackathon-Calendar/contents/README.md?ref=master"
         try:
-            self.list2.append(splitcontent(url_2))
+            self.list2.append(self.splitcontent(url_2))
         except RuntimeError:
             print("Couldn't fetch Hackathon-Calendar")
 
-        # list3[r]
+    def fetchHackathonWatch(self):
         url_3 = "http://hackathonwatch.com:80/api//hackathons/coming.json?page=1"
         r = requests.get(url_3)
         if r.status_code != 200:
@@ -63,10 +76,10 @@ where <data> is the city or location"""
         else:
             self.list3.append(r.json())
 
-        # list4[r]
+    def fetchHackathonIndia(self):
         url_4 = "https://api.github.com/repos/waseem18/Hackathons-In-India/contents/README.md"
         try:
-            self.list4.append(splitcontent(url_4))
+            self.list4.append(self.splitcontent(url_4))
         except RuntimeError:
             print("Couldn't fetch Hackathons-In-India")
 
