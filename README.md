@@ -2,6 +2,8 @@ Hacks
 ============
 A Linux terminal client to find upcoming Hackathons near you or at a particular location.
 
+[![Build Status](https://travis-ci.org/tibyte/Hacks.svg?branch=master)](https://travis-ci.org/tibyte/Hacks)
+
 Installation
 --------------
 1. Clone the repository
