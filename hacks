@@ -13,8 +13,11 @@ day = datetime.datetime.now().day
 
 
 class Hackanswers:
+    """object to hold information from our sources, to be dissected later."""
 
     def fetch(self):
+        """prepares the object to be queried for results by HackathonsList?(data),
+where <data> is the city or location"""
         print("Please wait a few seconds while we fetch the details for you...")
         self.list1 = []
         self.list2 = []
@@ -22,6 +25,7 @@ class Hackanswers:
         self.list4 = []
 
         def splitcontent(url):
+            """possible abstraction for splitting request answeres"""
             r = requests.get(url)
             if r.status_code != 200:
                 raise RuntimeError
@@ -66,9 +70,9 @@ class Hackanswers:
         except RuntimeError:
             print("Couldn't fetch Hackathons-In-India")
 
+# initialization
 hacks_result = []
 hacks_answer = Hackanswers()
-
 
 def HackathonsList1(city):
     data1 = hacks_answer.list1[0]
@@ -221,6 +225,7 @@ def HackathonsList4(city):
 
 
 def print_help():
+    """prints the help string"""
     print("Usage:")
     print("     1. Just typing 'hacks' outputs the list of Hackathons in or near your location!\n")
     print("     2. Command 'hacks California' gives the list of Hackathons in California.\n")
@@ -229,11 +234,28 @@ def print_help():
 
 
 def runLists(data):
+    """call this function with your location as <data>
+it will append every valid Hackathon to hacks_result"""
     for f in [HackathonsList1, HackathonsList2, HackathonsList3, HackathonsList4]:
         try:
             f(data)
         except:
             pass
+
+def printResults():
+    """This print all entries in hacks_result.
+Consider running hacks_answer.fetch() beforehand.
+    """
+    print("\n-----------------------------------------------------------------")
+    for i in hacks_result:
+        print("Title     : " + i['Title'])
+        print("URL       : " + i['URL'])
+        print("Starts on : " + i['Starts on'])
+        if 'Ends on' in i:
+            print("Ends on   : " + i['Ends on'])
+        print("Location  : " + i['location'])
+        print("-----------------------------------------------------------------")
+    print("")
 
 
 if no_of_arguments == 1:
@@ -247,24 +269,16 @@ if no_of_arguments == 1:
     hacks_answer.fetch()
     runLists(city)
     runLists(region)
-    if len(hacks_result):
-        print("\n")
-        for i in hacks_result:
-            print("Title     : " + i['Title'])
-            print("URL       : " + i['URL'])
-            print("Starts on : " + i['Starts on'])
-            if i['Ends on']:
-                print("Ends on   : " + i['Ends on'])
-            print("Location  : " + i['location'])
-            print("-----------------------------------------------------------------")
     if len(hacks_result) == 0:
         print("Looking for Hackathons in %s, %s..." % (region, country))
-        runLists(region)
-        runLists(country)
+        runLists(region) # is this line necessary?
+        runLists(country) # does this make L266-268 redundant?
     if len(hacks_result) == 0:
         print("Looking for Hackathons in %s..." % (country))
-        runLists(country)
-    if len(hacks_result) == 0:
+        runLists(country) # can this possibly append something?
+    if len(hacks_result):
+        printResults()
+    else:
         print(
             "We couldn't find hackathons in %s, %s.\n"
             "Try refining the search location Or try the command, 'hacks locationName'.\n"
@@ -279,20 +293,16 @@ elif no_of_arguments == 2:
     elif city == "--version":
         print("Hacks  - 0.1.1\n")
         print("https://github.com/waseem18/hacks\n")
-        exit(0)
+        sys.exit(0)
+    elif city in ["-a", "--all"]:
+        hacks_answer.fetch()
+        runLists("")
+        printResults()
+        sys.exit(0)
     hacks_answer.fetch()
     runLists(city)
     if len(hacks_result):
-        print("\n-----------------------------------------------------------------")
-        for i in hacks_result:
-            print("Title     : " + i['Title'])
-            print("URL       : " + i['URL'])
-            print("Starts on : " + i['Starts on'])
-            if 'Ends on' in i:
-                print("Ends on   : " + i['Ends on'])
-            print("Location  : " + i['location'])
-            print("-----------------------------------------------------------------")
-        print("")
+        printResults()
     else:
         print(
             "We couldn't find hackathons in %s.\n"
@@ -301,25 +311,11 @@ elif no_of_arguments == 2:
 
 
 elif no_of_arguments > 2:
-    c = ""
-    j = 1
-    while j < len(sys.argv):
-        c += sys.argv[j]
-        c += " "
-        j += 1
-    city = str(c[0:len(c) - 1])
+    city = " ".join(sys.argv[1:])
     hacks_answer.fetch()
     runLists(city)
     if len(hacks_result):
-        print("\n")
-        for i in hacks_result:
-            print("Title     : " + i['Title'])
-            print("URL       : " + i['URL'])
-            print("Starts on : " + i['Starts on'])
-            if 'Ends on' in i:
-                print("Ends on   : " + i['Ends on'])
-            print("Location  : " + i['location'])
-            print("-----------------------------------------------------------------")
+        printResults()
     else:
         print(
             "We couldn't find hackathons in %s.\n"

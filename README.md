@@ -2,6 +2,8 @@ Hacks
 ============
 A Linux terminal client to find upcoming Hackathons near you or at a particular location.
 
+[![Build Status](https://travis-ci.org/tibyte/Hacks.svg?branch=master)](https://travis-ci.org/tibyte/Hacks)
+
 Installation
 --------------
 1. Clone the repository
@@ -28,6 +30,9 @@ hacks California
 hacks New York
 hacks Canada
 hacks Hyderabad
+hacks --version
+hacks --help
+hacks --all
 ```
 
 Note
@@ -48,4 +53,3 @@ Contributions
 
 
 [![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/waseem18/hacks/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
-
