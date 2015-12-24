@@ -30,7 +30,7 @@ where <data> is the city or location"""
         try:
             import tqdm
             fetchalg = tqdm.tqdm(fetchalg)
-        except:
+        except ImportError:
             pass
         for alg in fetchalg:
             alg()
@@ -87,9 +87,11 @@ where <data> is the city or location"""
 hacks_result = []
 hacks_answer = Hackanswers()
 
-def HackathonsList1(city):
-    data1 = hacks_answer.list1[0]
-    data2 = hacks_answer.list1[1]
+def HackathonsList1(city, source=hacks_answer, target=None):
+    data1 = source.list1[0]
+    data2 = source.list1[1]
+    if target is None:
+        target=hacks_result
     for i in data1[str(calendar.month_name[month])]:
         if city.lower() in (i['host'] + " " + i['city']).lower():
             hack = {}
@@ -112,7 +114,7 @@ def HackathonsList1(city):
                 hack['Contact'] = "i['facebookURL']"
             elif i['twitterURL'] != "":
                 hack['Contact'] = i['twitterURL']
-            hacks_result.append(hack)
+            target.append(hack)
     for i in data2[str(calendar.month_name[1])]:
         if city.lower() in (i['host'] + " " + i['city']).lower():
             hack = {}
@@ -135,11 +137,13 @@ def HackathonsList1(city):
                 hack['Contact'] = i['facebookURL']
             elif i['twitterURL'] != "":
                 hack['Contact'] = i['twitterURL']
-            hacks_result.append(hack)
+            target.append(hack)
 
 
-def HackathonsList2(city):
-    decoded_content = hacks_answer.list2[0]
+def HackathonsList2(city, source=hacks_answer, target=None):
+    if target is None:
+        target=hacks_result
+    decoded_content = source.list2[0]
     for i in decoded_content:
         hack = {}
         if i[0:3] == "| [":
@@ -177,11 +181,13 @@ def HackathonsList2(city):
                 hack['Starts on'] = str(calendar.month_name[int(start[0])]) + " " + str(start[1])
                 hack['Ends on'] = str(calendar.month_name[int(end[0])]) + " " + str(end[1])
             if city.lower() in hack['location'].lower():
-                hacks_result.append(hack)
+                target.append(hack)
 
 
-def HackathonsList3(city):
-    data = hacks_answer.list3[0]
+def HackathonsList3(city, source=hacks_answer, target=None):
+    if target is None:
+        target=hacks_result
+    data = source.list3[0]
     for i in data:
         if city.lower() in i['full_address'].lower():
             hack = {}
@@ -195,11 +201,13 @@ def HackathonsList3(city):
             hack['Ends on'] = datetime.datetime.fromtimestamp(i['finish_timestamp']).strftime(
                 '%Y-%m-%d %H:%M:%S')
             hack['location'] = i['full_address']
-            hacks_result.append(hack)
+            target.append(hack)
 
 
-def HackathonsList4(city):
-    decoded_content = hacks_answer.list4[0]
+def HackathonsList4(city, source=hacks_answer, target=None):
+    if target is None:
+        target=hacks_result
+    decoded_content = source.list4[0]
     for i in decoded_content:
         hack = {}
         if str(i[0:2]) == "|[":
@@ -234,7 +242,7 @@ def HackathonsList4(city):
                 j += 1
             hack['Ends on'] = end
             if city.lower() in hack['location'].lower():
-                hacks_result.append(hack)
+                target.append(hack)
 
 
 def print_help():
@@ -270,67 +278,71 @@ Consider running hacks_answer.fetch() beforehand.
         print("-----------------------------------------------------------------")
     print("")
 
-
-if no_of_arguments == 1:
-    # Outputs details of upcoming hackathons in the location of the user.
-    url = "http://ip-api.com/json"
-    r = requests.get(url)
-    data = r.json()
-    city = str(data['city'])
-    region = data['regionName']
-    country = data['country']
-    hacks_answer.fetch()
-    runLists(city)
-    runLists(region)
-    if len(hacks_result) == 0:
-        print("Looking for Hackathons in %s, %s..." % (region, country))
-        runLists(region) # is this line necessary?
-        runLists(country) # does this make L266-268 redundant?
-    if len(hacks_result) == 0:
-        print("Looking for Hackathons in %s..." % (country))
-        runLists(country) # can this possibly append something?
-    if len(hacks_result):
-        printResults()
-    else:
-        print(
-            "We couldn't find hackathons in %s, %s.\n"
-            "Try refining the search location Or try the command, 'hacks locationName'.\n"
-            "Eg: hacks California" % (city, country))
-
-
-elif no_of_arguments == 2:
-    city = str(sys.argv[1])
-    if city == "-h" or city == "--help":
-        print_help()
-        sys.exit(0)
-    elif city == "--version":
-        print("Hacks  - 0.1.1\n")
-        print("https://github.com/waseem18/hacks\n")
-        sys.exit(0)
-    elif city in ["-a", "--all"]:
+def main():
+    global hacks_result
+    global hacks_answer
+    if no_of_arguments == 1:
+        # Outputs details of upcoming hackathons in the location of the user.
+        url = "http://ip-api.com/json"
+        r = requests.get(url)
+        data = r.json()
+        city = str(data['city'])
+        region = data['regionName']
+        country = data['country']
         hacks_answer.fetch()
-        runLists("")
-        printResults()
-        sys.exit(0)
-    hacks_answer.fetch()
-    runLists(city)
-    if len(hacks_result):
-        printResults()
-    else:
-        print(
-            "We couldn't find hackathons in %s.\n"
-            "Try refining the search location or find more hackathons at "
-            "https://github.com/japacible/Hackathon-Calendar" % (city))
+        runLists(city)
+        runLists(region)
+        if len(hacks_result) == 0:
+            print("Looking for Hackathons in %s, %s..." % (region, country))
+            runLists(region) # is this line necessary?
+            runLists(country) # does this make L266-268 redundant?
+        if len(hacks_result) == 0:
+            print("Looking for Hackathons in %s..." % (country))
+            runLists(country) # can this possibly append something?
+        if len(hacks_result):
+            printResults()
+        else:
+            print(
+                "We couldn't find hackathons in %s, %s.\n"
+                "Try refining the search location Or try the command, 'hacks locationName'.\n"
+                "Eg: hacks California" % (city, country))
 
+    elif no_of_arguments == 2:
+        city = str(sys.argv[1])
+        if city == "-h" or city == "--help":
+            print_help()
+            sys.exit(0)
+        elif city == "--version":
+            print("Hacks  - 0.1.1\n")
+            print("https://github.com/waseem18/hacks\n")
+            sys.exit(0)
+        elif city in ["-a", "--all"]:
+            hacks_answer.fetch()
+            runLists("")
+            printResults()
+            sys.exit(0)
+        hacks_answer.fetch()
+        runLists(city)
+        if len(hacks_result):
+            printResults()
+        else:
+            print(
+                "We couldn't find hackathons in %s.\n"
+                "Try refining the search location or find more hackathons at "
+                "https://github.com/japacible/Hackathon-Calendar" % (city))
 
-elif no_of_arguments > 2:
-    city = " ".join(sys.argv[1:])
-    hacks_answer.fetch()
-    runLists(city)
-    if len(hacks_result):
-        printResults()
-    else:
-        print(
-            "We couldn't find hackathons in %s.\n"
-            "Try refining the search location or find more hackathons at "
-            "https://github.com/japacible/Hackathon-Calendar" % (city))
+    elif no_of_arguments > 2:
+        city = " ".join(sys.argv[1:])
+        hacks_answer.fetch()
+        runLists(city)
+        if len(hacks_result):
+            printResults()
+        else:
+            print(
+                "We couldn't find hackathons in %s.\n"
+                "Try refining the search location or find more hackathons at "
+                "https://github.com/japacible/Hackathon-Calendar" % (city))
+    sys.exit(0)
+
+if __name__ == "__main__":
+    main()
