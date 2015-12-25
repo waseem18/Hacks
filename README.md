@@ -22,6 +22,7 @@ Commands
 ```
 hacks                                 Outputs details of Hackathons in or near your current location.
 hacks [location]                      Outputs details of Hackathons in or near [location]
+hacks --all                           Outputs details of Hackathons all over the World.
 ```
 Examples
 --------
@@ -51,6 +52,3 @@ Contributions
 ---------------
 1. If you know about any upcoming hackathons, add it to [Hackathon-Calendar](https://github.com/japacible/Hackathon-Calendar). If hackathon is particularly from India, add it to [Hackathons-In-India](https://github.com/waseem18/Hackathons-In-India)
 2. Contribute to this repository by removing bugs, improving code efficiency, adding new sources of hackathons etc. I will happily merge it :)
-
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/waseem18/hacks/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
