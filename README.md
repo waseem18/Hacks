@@ -2,7 +2,7 @@ Hacks
 ============
 A Linux terminal client to find upcoming Hackathons near you or at a particular location.
 
-[![Build Status](https://travis-ci.org/tibyte/Hacks.svg?branch=master)](https://travis-ci.org/tibyte/Hacks)
+[![Build Status](https://travis-ci.org/waseem18/Hacks.svg?branch=master)](https://travis-ci.org/waseem18/Hacks)
 [![Join the chat at https://gitter.im/waseem18/Hacks](https://badges.gitter.im/waseem18/Hacks.svg)](https://gitter.im/waseem18/Hacks?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Installation
