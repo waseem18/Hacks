@@ -46,8 +46,8 @@ where <data> is the city or location"""
 
         # list1[r1,r2]
     def fetchHackathonList(self):
-        url_1_1 = "http://www.hackalist.org/api/1.0/" + str(year) + "/" + str(month) + ".json"
-        url_1_2 = "http://www.hackalist.org/api/1.0/" + str(year) + "/" + str(month + 1) + ".json"
+        url_1_1 = "http://www.hackalist.org/api/1.0/" + str(year) + "/" + "{:02}".format(month) + ".json"
+        url_1_2 = "http://www.hackalist.org/api/1.0/" + str(year) + "/" + "{:02}".format(month+1) + ".json"
         if month == 12:
             url_1_2 = "http://www.hackalist.org/api/1.0/" + str(year + 1) + "/" + "01" + ".json"
         r1 = requests.get(url_1_1)
