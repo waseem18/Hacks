@@ -44,7 +44,6 @@ Details of Hackathons have been taken from
 1. [Hackalist](http://www.hackalist.org)
 2. [Hackathon-Calendar](https://github.com/japacible/Hackathon-Calendar)
 3. [HackathonWatch](http://www.hackathonwatch.com)
-4. [Hackathons-In-India](https://github.com/waseem18/Hackathons-In-India)
 
 
 
